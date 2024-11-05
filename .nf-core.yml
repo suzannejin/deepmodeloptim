@@ -12,14 +12,17 @@ lint:
     - assets/sendmail_template.txt
     - .github/CONTRIBUTING.md
     - assets/sendmail_template.txt
+    - assets/nf-core-deepmodeloptim_logo_light.png
+    - docs/images/nf-core-deepmodeloptim_logo_light.png
+    - docs/images/nf-core-deepmodeloptim_logo_dark.png
   multiqc_config: false
 nf_core_version: 3.0.2
 org_path: null
 repository_type: pipeline
 template:
   author: Mathys Grapotte
-  description: nf-core/deepmodeloptim is an end-to-end nextflow based pipeline for
-    statistically testing training procedures of machine learning models
+  description: nf-core/deepmodeloptim is an end-to-end pipeline designed to
+    facilitate the testing and development of deep learning models for genomics.
   force: false
   is_nfcore: true
   name: deepmodeloptim
