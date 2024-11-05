@@ -278,7 +278,16 @@ The `experiment_config` is a mandatory input for the pipeline and can be passed 
 
 nf-core/deepmodeloptim was originally written by Mathys Grapotte ([@mathysgrapotte](https://github.com/mathysgrapotte)).
 
-We thank the following people for their extensive assistance in the development of this pipeline:
+We would like to thank to all the contributors for their extensive assistance in the development of this pipeline, who include (but not limited to):
+
+- Alessio Vignoli ([@alessiovignoli](https://github.com/alessiovignoli))
+- Suzanne Jin ([@suzannejin](https://github.com/suzannejin))
+- Luisa Santus ([@luisas](https://github.com/luisas))
+- Jose Espinosa ([@JoseEspinosa](https://github.com/JoseEspinosa))
+- Evan Floden ([@evanfloden](https://github.com/evanfloden))
+- Igor Trujnara ([@itrujnara](https://github.com/itrujnara))
+
+Special thanks for the artistic work on the logo to Maxime ([@maxulysse](https://github.com/maxulysse)), Suzanne ([@suzannejin](https://github.com/suzannejin)), Mathys ([@mathysgrapotte](https://github.com/mathysgrapotte)) and, not surprisingly, ChatGPT.
 
 <!-- TODO nf-core: If applicable, make list of people who have also contributed -->
 
