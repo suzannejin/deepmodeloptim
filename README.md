@@ -276,7 +276,7 @@ The `experiment_config` is a mandatory input for the pipeline and can be passed 
     Update the author list
 -->
 
-nf-core/deepmodeloptim was originally written by Mathys Grapotte (@mathysgrapotte).
+nf-core/deepmodeloptim was originally written by Mathys Grapotte ([@mathysgrapotte](https://github.com/mathysgrapotte)).
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
