@@ -17,15 +17,26 @@
 
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23deepmodeloptim-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/deepmodeloptim)[![Follow on Twitter](http://img.shields.io/badge/twitter-%40nf__core-1DA1F2?labelColor=000000&logo=twitter)](https://twitter.com/nf_core)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
 
+
+## 📌 **Quick intro** check out this 👉🏻 [video](https://www.youtube.com/watch?v=dC5p_tXQpEs&list=PLPZ8WHdZGxmVKQga4KE15YVt95i-QXVvE&index=25)!
+
 ## Introduction
 
-**nf-core/deepmodeloptim** is a bioinformatics end-to-end pipeline that performs statistically testing training procedures of machine learning models.
+**nf-core/deepmodeloptim** is a bioinformatics end-to-end pipeline designed to facilitate the testing and development of deep learning models for genomics.
 
-Deep learning model development in natural science is an empirical and costly process. Users must define a pre-processing pipeline, an architecture, find the best parameters for said architecture and iterate over this process.
+Deep learning model development in natural science is an empirical and costly process. Despite the existence of generic tools for the tuning of hyperparameters and the training of the models, the connection between these procedures and the impact coming from the data is often underlooked, or at least not easily automatized. Indeed, researchers must define a pre-processing pipeline, an architecture, find the best parameters for said architecture and iterate over this process, often manually. 
 
-Leveraging the power of Nextflow (polyglotism, container integration, scalable on the cloud), we propose STIMULUS, an open-source software built to automatize deep learning model development for genomics.
+Leveraging the power of Nextflow (polyglotism, container integration, scalable on the cloud), this pipeline will help users to 1) automatize the testing of the model, 2) gain useful insights with respect to the learning behaviour of the model, and hence 3) accelerate the development.
 
-STIMULUS takes as input a user defined PyTorch model, a dataset, a configuration file to describe the pre-processing steps to be performed, and a range of parameters for the PyTorch model. It then transforms the data according to all possible pre-processing steps, finds the best architecture parameters for each of the transformed datasets, performs sanity checks on the models and train a minimal deep learning version for each dataset/architecture.
+## Pipeline summary
+
+It takes as input:
+ - A dataset 
+ - A configuration file to describe the data pre-processing steps to be performed
+ - An user defined PyTorch model
+ - A configuration file describing the range of parameters for the PyTorch model
+
+It then transforms the data according to all possible pre-processing steps, finds the best architecture parameters for each of the transformed datasets, performs sanity checks on the models and train a minimal deep learning version for each dataset/architecture.
 
 Those experiments are then compiled into an intuitive report, making it easier for scientists to pick the best design choice to be sent to large scale training.
 
@@ -265,7 +276,7 @@ The `experiment_config` is a mandatory input for the pipeline and can be passed 
     Update the author list
 -->
 
-nf-core/deepmodeloptim was originally written by Mathys Grapotte.
+nf-core/deepmodeloptim was originally written by Mathys Grapotte (@mathysgrapotte).
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
