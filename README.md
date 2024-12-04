@@ -40,7 +40,10 @@ It then transforms the data according to all possible pre-processing steps, find
 
 Those experiments are then compiled into an intuitive report, making it easier for scientists to pick the best design choice to be sent to large scale training.
 
-![A metro map describing the structure of the pipeline](assets/metromap.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/metromap.png">
+  <img alt="nf-core/deepmodeloptim metro map" src="assets/metromap_light.png">
+</picture>
 
 ## Usage
 
