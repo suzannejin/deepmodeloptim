@@ -81,11 +81,11 @@ workflow DEEPMODELOPTIM {
     // ==============================================================================
 
     CHECK_MODEL_WF (
-         ch_transformed_data.first(),
-         ch_yaml_sub_config.first(),
-         ch_model,
-         ch_model_config,
-         ch_initial_weights
+        ch_transformed_data.first(),
+        ch_yaml_sub_config.first(),
+        ch_model,
+        ch_model_config,
+        ch_initial_weights
     )
 
     // ==============================================================================
