@@ -13,7 +13,7 @@ process STIMULUS_TRANSFORM_CSV {
     tuple val(meta), path("${prefix}.csv"), emit: transformed_data
 
     script:
-    prefix = "${data.simpleName}-${meta.id}-trans"
+    prefix = task.ext.prefix ?: "${data.simpleName}-${meta.id}-trans"
     """
     stimulus-transform-csv \
         -c ${data} \
@@ -22,7 +22,7 @@ process STIMULUS_TRANSFORM_CSV {
     """
 
     stub:
-    prefix = "${data.simpleName}-${meta.id}-trans"
+    prefix = task.ext.prefix ?: "${data.simpleName}-${meta.id}-trans"
     """
     touch ${prefix}.csv
     """

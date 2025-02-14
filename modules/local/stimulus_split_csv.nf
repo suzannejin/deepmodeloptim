@@ -14,7 +14,7 @@ process STIMULUS_SPLIT_DATA {
     tuple val(meta), path("${prefix}.csv"), emit: csv_with_split
 
     script:
-    prefix = "${meta2.id}-split-${meta.id}"
+    prefix = task.ext.prefix ?: "${meta2.id}-split-${meta.id}"
     """
     stimulus-split-csv \
         -c ${data} \
@@ -23,7 +23,7 @@ process STIMULUS_SPLIT_DATA {
     """
 
     stub:
-    prefix = "${meta2.id}-split-${meta.id}"
+    prefix = task.ext.prefix ?: "${meta2.id}-split-${meta.id}"
     """
     touch ${prefix}.csv
     """

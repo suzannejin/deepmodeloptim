@@ -17,8 +17,9 @@ process STIMULUS_TUNE {
     // TODO: this is a temporary fix with tuning.py
     // it needs to be updated in stimulus-py package
     script:
-    prefix = meta.id
-    use_initial_weights = initial_weights != [] ? "-w ${initial_weights}" : ""
+    prefix = task.ext.prefix ?: meta.id
+    def args = task.ext.args ?: ""
+    def use_initial_weights = initial_weights != [] ? "-w ${initial_weights}" : ""
     """
     if ! ray status 2>/dev/null; then
         ray start --head --temp-dir /tmp/ray
@@ -36,11 +37,12 @@ process STIMULUS_TUNE {
         -bc ${prefix}-best-tune-config.json \
         ${use_initial_weights} \
         --tune_run_name ${prefix}-tune-run \
-        --ray_results_dirpath "\${PWD}"
+        --ray_results_dirpath "\${PWD}" \
+        ${args}
     """
 
     stub:
-    prefix = meta.id
+    prefix = task.ext.prefix ?: meta.id
     """
     touch ${prefix}-best-model.safetensors
     touch ${prefix}-best-optimizer.opt

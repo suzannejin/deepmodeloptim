@@ -23,8 +23,6 @@ workflow CHECK_MODEL_WF {
     ch_initial_weights
 
     main:
-    def completion_message = "\n###\nThe model check was skipped.\n###\n"
-
     CHECK_MODEL(
         ch_data_config,
         ch_data,
@@ -32,8 +30,6 @@ workflow CHECK_MODEL_WF {
         ch_model_config,
         ch_initial_weights
     )
-    
-    completion_message = CHECK_MODEL.out.standardout
 }
 
 /*
