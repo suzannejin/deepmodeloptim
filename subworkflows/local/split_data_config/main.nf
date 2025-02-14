@@ -4,31 +4,24 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { STIMULUS_SPLIT_DATA } from '../../../modules/local/stimulus_split_csv.nf'
+include { SPLIT_DATA_CONFIG } from '../../../modules/local/split_data_config.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    RUN MAIN SUBWORKFLOW
+    RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow SPLIT_CSV_WF {
-
+workflow SPLIT_DATA_CONFIG_WF {
     take:
-        data_csv
-        yaml_sub_config
+    input_data_config
 
     main:
-        // Combine the CSV and JSON channels so that the tuple order matches the 
-        // input signature [data, data_sub_config] expected by @stimulus_split_csv.nf.
-        csv_json_pairs = data_csv.combine(yaml_sub_config.flatten())
-        STIMULUS_SPLIT_DATA( csv_json_pairs )
+    SPLIT_DATA_CONFIG( input_data_config )
 
     emit:
-        split_data = STIMULUS_SPLIT_DATA.out.csv_with_split
-
+    split_yaml = SPLIT_DATA_CONFIG.out.split_yaml
 }
-
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

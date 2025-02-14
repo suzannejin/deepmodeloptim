@@ -10,11 +10,11 @@
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_deepmodeloptim_pipeline'
-include { CHECK_MODEL            } from '../subworkflows/local/check_model'
-include { HANDLE_DATA            } from '../subworkflows/local/handle_data'
-include { HANDLE_TUNE            } from '../subworkflows/local/handle_tune'
-include { HANDLE_ANALYSIS        } from '../subworkflows/local/handle_analysis'
-
+include { CHECK_MODEL_WF         } from '../subworkflows/local/check_model'
+include { SPLIT_DATA_CONFIG_WF   } from '../subworkflows/local/split_data_config'
+include { SPLIT_CSV_WF           } from '../subworkflows/local/split_csv'
+include { TRANSFORM_CSV_WF      } from '../subworkflows/local/transform_csv'
+include { TUNE_WF                } from '../subworkflows/local/tune'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -24,64 +24,92 @@ include { HANDLE_ANALYSIS        } from '../subworkflows/local/handle_analysis'
 workflow DEEPMODELOPTIM {
 
     take:
-    // ch_samplesheet, // channel: samplesheet read in from --input
-    ch_csv
-    ch_exp_conf
+    // Updated input channels for stimulus-py
+    ch_data_config
+    ch_data
     ch_model
-    ch_tune_conf
-    ch_initial_weights
+    ch_model_config
+    //ch_initial_weights
 
     main:
 
     ch_versions = Channel.empty()
 
-    CHECK_MODEL (
-        params.csv,
-        params.exp_conf,
-        params.model,
-        params.tune_conf,
-        params.initial_weights
-    )
-    completion_message = CHECK_MODEL.out.completion_message
+    SPLIT_DATA_CONFIG_WF( ch_data_config )
+    ch_yaml_sub_config = SPLIT_DATA_CONFIG_WF.out.split_yaml
 
-    HANDLE_DATA(
-        params.csv,
-        params.exp_conf,
-        completion_message
+    SPLIT_CSV_WF(
+        ch_data,
+        ch_yaml_sub_config
     )
+
+    ch_split_data = SPLIT_CSV_WF.out.split_data
+
+    TRANSFORM_CSV_WF(
+        ch_split_data
+    )
+
+    ch_transformed_data = TRANSFORM_CSV_WF.out.transformed_data
+    
+    ch_sub_configs = ch_transformed_data.map { _csv, yaml -> yaml }
+    ch_transformed_data_splits = ch_transformed_data.map { csv, _yaml -> csv }
+
+    ch_first_sub_config = ch_sub_configs.first()
+    ch_first_transformed_data_split = ch_transformed_data_splits.first()
+
+    
+    /*
+    // Update CHECK_MODEL invocation using channels
+    CHECK_MODEL_WF (
+         ch_first_sub_config,
+         ch_first_data_split,
+         ch_model,
+         ch_model_config
+         //ch_initial_weights
+    )
+    */
+
+    
+    TUNE_WF(
+        ch_transformed_data_splits,
+        ch_sub_configs,
+        ch_model,
+        ch_model_config
+    )
+
+    
+    TUNE_WF.out.tune_specs.view()
+
+    emit: 
+    ch_split_data
+    /*
     prepared_data = HANDLE_DATA.out.data
     //HANDLE_DATA.out.data.view()
 
+    // Update HANDLE_TUNE invocation using channels
     HANDLE_TUNE(
-        params.model,
-        params.tune_conf,
+        ch_model,
+        ch_model_config,
         prepared_data,
-        params.initial_weights
+        ch_initial_weights
     )
     //HANDLE_TUNE.out.model.view()
     //HANDLE_TUNE.out.tune_out.view()
 
-    // this part works, but the docker container is not updated with matplotlib yet
-    HANDLE_ANALYSIS(
-        HANDLE_TUNE.out.tune_out,
-        HANDLE_TUNE.out.model
-    )
-
-    //
-    // Collate and save software versions
-    //
-    // TODO: collect software versions
-    // softwareVersionsToYAML(ch_versions)
-    //     .collectFile(
-    //         storeDir: "${params.outdir}/pipeline_info",
-    //         name: 'nf_core_'  + 'pipeline_software_' +  ''  + 'versions.yml',
-    //         sort: true,
-    //         newLine: true
-    //     ).set { ch_collated_versions }
-
+    /*
+    // Software versions collation remains as comments
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'nf_core_'  + 'pipeline_software_' +  ''  + 'versions.yml',
+            sort: true,
+            newLine: true
+        ).set { ch_collated_versions }
+    
 
     emit:
-    versions       = ch_versions                 // channel: [ path(versions.yml) ]
+    versions = ch_versions  // channel: [ path(versions.yml) ]
+    */
 
 }
 

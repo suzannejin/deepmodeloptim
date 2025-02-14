@@ -12,10 +12,10 @@ include { STIMULUS_TRANSFORM_CSV } from '../../../modules/local/stimulus_transfo
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow TRANSFORM_CSV {
+workflow TRANSFORM_CSV_WF {
 
     take:
-    csv_json_pairs
+    splitted_csv_sub_data_config_pairs
 
 
     main:
@@ -23,7 +23,7 @@ workflow TRANSFORM_CSV {
     // TODO if the option is parellalization (for the above) then add csv column splitting  noising  merging
 
     // what follows is temporary, becuase there shuold be much more than this
-    STIMULUS_TRANSFORM_CSV( csv_json_pairs )
+    STIMULUS_TRANSFORM_CSV( splitted_csv_sub_data_config_pairs )
 
 
     emit:
