@@ -35,24 +35,53 @@ workflow DEEPMODELOPTIM {
 
     ch_versions = Channel.empty()
 
+    // ==============================================================================
     // split meta yaml config file into individual yaml files
+    // ==============================================================================
 
     SPLIT_DATA_CONFIG_WF( ch_data_config )
     ch_yaml_sub_config = SPLIT_DATA_CONFIG_WF.out.sub_config
 
+    // ==============================================================================
     // split csv data file
+    // ==============================================================================
+
+    // NOTE for the moment, the previous step of yaml split is splitting the yaml file
+    // into individual sub yaml files with all the fields.
+    // The best would be to have a first step that splits into individual splitting-related
+    // configs into individual splitting yaml files, and then a second step that splits the
+    // transformation-related configs into individual transformation yaml files.
+    // Then this pipeline will run m split configs x n transform configs times.
+    // 
+    // Given this is not possible now, this implementation will only allow the user to
+    // provide a yaml file that only contains one splitting way. 
+    // Here we take the first sub yaml for data splitting, since all sub configs contain
+    // the same information about data splitting.
+    //
+    // TODO remove this when the above is implemented
 
     SPLIT_CSV_WF(
         ch_data,
-        ch_yaml_sub_config
+        ch_yaml_sub_config.first()
     )
-    ch_split_data = SPLIT_CSV_WF.out.split_data
+    ch_split_data_with_sub_config = SPLIT_CSV_WF.out.split_data
+        .combine(ch_yaml_sub_config)
+        .multiMap { meta_data, data, meta_yaml, yaml ->
+            data:
+                [meta_yaml, data]
+            yaml:
+                [meta_yaml, yaml]
+        }
 
-    // TRANSFORM_CSV_WF(
-    //     ch_split_data
-    // )
+    // ==============================================================================
+    // transform csv file
+    // ==============================================================================
 
-    // ch_transformed_data = TRANSFORM_CSV_WF.out.transformed_data
+    TRANSFORM_CSV_WF(
+        ch_split_data_with_sub_config.data,
+        ch_split_data_with_sub_config.yaml
+    )
+    ch_transformed_data = TRANSFORM_CSV_WF.out.transformed_data
     
     // ch_sub_configs = ch_transformed_data.map { _csv, yaml -> yaml }
     // ch_transformed_data_splits = ch_transformed_data.map { csv, _yaml -> csv }
