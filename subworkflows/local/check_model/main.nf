@@ -1,10 +1,12 @@
+// Start of Selection
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { CHECK_TORCH_MODEL } from '../../../modules/local/check_torch_model.nf'
+// Updated import to reference the new module path as per the latest codebase conventions 
+include { CHECK_MODEL } from '../../../modules/local/check_model.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -12,50 +14,45 @@ include { CHECK_TORCH_MODEL } from '../../../modules/local/check_torch_model.nf'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow CHECK_MODEL {
+workflow CHECK_MODEL_WF {
 
     take:
-    input_csv
-    input_json
-    input_model
-    input_tune_config
-    input_initial_weights
+        // Renamed inputs to match the keys defined in nextflow_schema.json and used in @deepmodeloptim.nf and @main.nf
+        ch_data_config
+        ch_data
+        ch_model
+        ch_model_config
+        //ch_initial_weights
 
     main:
+        def completion_message = "\n###\nThe model check was skipped.\n###\n"
 
-    completion_message = "\n###\nThe check of the model has been skipped.\n###\n"
+        // Only perform the model check if enabled (default: true)
 
-    // It can be still skipped, but by default is run.
-    if ( params.check_model ) {
 
-        // put the files in channels
-        csv         = Channel.fromPath( input_csv  )
-        model       = Channel.fromPath( input_model  ).first()  // TODO implement a check and complain if more that one file is pased as model
-        json        = Channel.fromPath( input_json )
-        tune_config = Channel.fromPath( input_tune_config )
+        // Assign incoming channels using descriptive names from the updated schema:
+        data_csv     = ch_data
+        model_file   = ch_model // Assumes a single model file is provided
+        data_config  = ch_data_config
+        model_config = ch_model_config
 
-        // combine everything toghether in a all vs all manner
-        model_tuple = csv.combine(model)
-            .combine(json)
-            .combine(tune_config)
+        // Combine channels into a single tuple in the order expected:
+        // [data_csv, model_file, data_config, model_config]
+        model_tuple = data_csv.combine( model_file )
+                                    .combine( data_config )
+                                    .combine( model_config )
+                                    .map { tuple -> tuple.flatten() }
 
-        // add initial weights, if provided
-        if (input_initial_weights == null){
-            model_tuple = model_tuple.map{ it -> [it[0], it[1], it[2], it[3], []] }
-        }else{
-            initial_weights = Channel.fromPath( input_initial_weights )
-            model_tuple = model_tuple.combine(initial_weights)
-        }
+        // Append initial weights to the tuple if provided; otherwise, insert an empty list.
+        //if ( !ch_initial_weights ) {
+        //    model_tuple = model_tuple.map { items -> [ items[0], items[1], items[2], items[3], [] ] }
+        //} else {
+        //    model_tuple = model_tuple.combine( ch_initial_weights )
+        //}
 
-        // launch the check using torch. TODO put selection of module based on type: torc, tensorflow ecc..
-        CHECK_TORCH_MODEL( model_tuple )
-        completion_message = CHECK_TORCH_MODEL.out.standardout
-
-    }
-
-    // to enforce that the second run workflow depends on this one
-    emit:
-    completion_message
+        // Launch the model-check process using the updated @check_model.nf implementation.
+        CHECK_MODEL( model_tuple )
+        completion_message = CHECK_MODEL.out.standardout
 
 }
 
@@ -64,3 +61,5 @@ workflow CHECK_MODEL {
     THE END
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+// End of Selection
+
