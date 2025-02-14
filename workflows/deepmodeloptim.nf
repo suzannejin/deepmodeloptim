@@ -13,7 +13,7 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_deep
 include { CHECK_MODEL_WF         } from '../subworkflows/local/check_model'
 include { SPLIT_DATA_CONFIG_WF   } from '../subworkflows/local/split_data_config'
 include { SPLIT_CSV_WF           } from '../subworkflows/local/split_csv'
-include { TRANSFORM_CSV_WF      } from '../subworkflows/local/transform_csv'
+include { TRANSFORM_CSV_WF       } from '../subworkflows/local/transform_csv'
 include { TUNE_WF                } from '../subworkflows/local/tune'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,53 +35,56 @@ workflow DEEPMODELOPTIM {
 
     ch_versions = Channel.empty()
 
+    // split meta yaml config file into individual yaml files
+
     SPLIT_DATA_CONFIG_WF( ch_data_config )
-    ch_yaml_sub_config = SPLIT_DATA_CONFIG_WF.out.split_yaml
+    ch_yaml_sub_config = SPLIT_DATA_CONFIG_WF.out.sub_config
+
+    // split csv data file
 
     SPLIT_CSV_WF(
         ch_data,
         ch_yaml_sub_config
     )
-
     ch_split_data = SPLIT_CSV_WF.out.split_data
 
-    TRANSFORM_CSV_WF(
-        ch_split_data
-    )
+    // TRANSFORM_CSV_WF(
+    //     ch_split_data
+    // )
 
-    ch_transformed_data = TRANSFORM_CSV_WF.out.transformed_data
+    // ch_transformed_data = TRANSFORM_CSV_WF.out.transformed_data
     
-    ch_sub_configs = ch_transformed_data.map { _csv, yaml -> yaml }
-    ch_transformed_data_splits = ch_transformed_data.map { csv, _yaml -> csv }
+    // ch_sub_configs = ch_transformed_data.map { _csv, yaml -> yaml }
+    // ch_transformed_data_splits = ch_transformed_data.map { csv, _yaml -> csv }
 
-    ch_first_sub_config = ch_sub_configs.first()
-    ch_first_transformed_data_split = ch_transformed_data_splits.first()
-
-    
-    /*
-    // Update CHECK_MODEL invocation using channels
-    CHECK_MODEL_WF (
-         ch_first_sub_config,
-         ch_first_data_split,
-         ch_model,
-         ch_model_config
-         //ch_initial_weights
-    )
-    */
+    // ch_first_sub_config = ch_sub_configs.first()
+    // ch_first_transformed_data_split = ch_transformed_data_splits.first()
 
     
-    TUNE_WF(
-        ch_transformed_data_splits,
-        ch_sub_configs,
-        ch_model,
-        ch_model_config
-    )
+    // /*
+    // // Update CHECK_MODEL invocation using channels
+    // CHECK_MODEL_WF (
+    //      ch_first_sub_config,
+    //      ch_first_data_split,
+    //      ch_model,
+    //      ch_model_config
+    //      //ch_initial_weights
+    // )
+    // */
 
     
-    TUNE_WF.out.tune_specs.view()
+    // TUNE_WF(
+    //     ch_transformed_data_splits,
+    //     ch_sub_configs,
+    //     ch_model,
+    //     ch_model_config
+    // )
 
-    emit: 
-    ch_split_data
+    
+    // TUNE_WF.out.tune_specs.view()
+
+    // emit: 
+    // ch_split_data
     /*
     prepared_data = HANDLE_DATA.out.data
     //HANDLE_DATA.out.data.view()

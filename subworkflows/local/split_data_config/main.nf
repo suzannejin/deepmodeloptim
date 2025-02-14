@@ -14,13 +14,16 @@ include { SPLIT_DATA_CONFIG } from '../../../modules/local/split_data_config.nf'
 
 workflow SPLIT_DATA_CONFIG_WF {
     take:
-    input_data_config
+    ch_data_config
 
     main:
-    SPLIT_DATA_CONFIG( input_data_config )
+    SPLIT_DATA_CONFIG( ch_data_config )
+    ch_yaml_sub_config = SPLIT_DATA_CONFIG.out.sub_config
+        .flatten()
+        .map { yaml -> [[id: yaml.baseName], yaml] }
 
     emit:
-    split_yaml = SPLIT_DATA_CONFIG.out.split_yaml
+    sub_config = ch_yaml_sub_config
 }
 
 /*

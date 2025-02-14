@@ -10,7 +10,7 @@ process SPLIT_DATA_CONFIG {
     path data_config
 
     output:
-    path ("*.yaml"), emit: split_yaml
+    path ("*.yaml"), emit: sub_config
 
     script:
     """
@@ -19,6 +19,8 @@ process SPLIT_DATA_CONFIG {
 
     stub:
     """
-    touch test-split-null.yaml
+    touch test_0.yaml
+    touch test_1.yaml
+    touch test_2.yaml
     """
 }
