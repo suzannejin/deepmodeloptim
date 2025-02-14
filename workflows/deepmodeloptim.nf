@@ -51,9 +51,9 @@ workflow DEEPMODELOPTIM {
     // configs into individual splitting yaml files, and then a second step that splits the
     // transformation-related configs into individual transformation yaml files.
     // Then this pipeline will run m split configs x n transform configs times.
-    // 
+    //
     // Given this is not possible now, this implementation will only allow the user to
-    // provide a yaml file that only contains one splitting way. 
+    // provide a yaml file that only contains one splitting way.
     // Here we take the first sub yaml for data splitting, since all sub configs contain
     // the same information about data splitting.
     //
@@ -109,7 +109,7 @@ workflow DEEPMODELOPTIM {
             sort: true,
             newLine: true
         ).set { ch_collated_versions }
-    
+
 
     emit:
     versions = ch_versions  // channel: [ path(versions.yml) ]

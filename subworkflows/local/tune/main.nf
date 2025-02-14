@@ -19,7 +19,7 @@ workflow TUNE_WF {
     ch_model
     ch_model_config
     ch_initial_weights
-    
+
     main:
 
     ch_tune_input = ch_transformed_data
