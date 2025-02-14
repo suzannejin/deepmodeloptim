@@ -35,7 +35,7 @@ workflow NFCORE_DEEPMODELOPTIM {
         data
         model
         model_config
-        //initial_weights
+        initial_weights
 
     main:
 
@@ -46,8 +46,8 @@ workflow NFCORE_DEEPMODELOPTIM {
         data_config,
         data,
         model,
-        model_config
-        //initial_weights
+        model_config,
+        initial_weights
     )
 }
 
@@ -75,18 +75,23 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    ch_data_config     = Channel.fromPath(params.data_config, checkIfExists: true)
-    ch_data            = Channel.fromPath(params.data, checkIfExists: true)
-    ch_model           = Channel.fromPath(params.model, checkIfExists: true)
-    ch_model_config    = Channel.fromPath(params.model_config, checkIfExists: true)
-    //def ch_initial_weights = Channel.value(params.initial_weights)
+    ch_data_config     = Channel.fromPath(params.data_config, checkIfExists: true).map { it -> [[id:it.baseName], it]}
+    ch_data            = Channel.fromPath(params.data, checkIfExists: true).map { it -> [[id:it.baseName], it]}
+    ch_model           = Channel.fromPath(params.model, checkIfExists: true).map { it -> [[id:it.baseName], it]}
+    ch_model_config    = Channel.fromPath(params.model_config, checkIfExists: true).map { it -> [[id:it.baseName], it]}
+    if (params.initial_weights != null) {
+        ch_initial_weights = Channel.fromPath(params.initial_weights, checkIfExists: true)
+            .map { it -> [[id:it.baseName], it]}
+    } else {
+        ch_initial_weights = Channel.of([[],[]])
+    }
 
     NFCORE_DEEPMODELOPTIM (
         ch_data_config,
         ch_data,
         ch_model,
-        ch_model_config
-        //ch_initial_weights
+        ch_model_config,
+        ch_initial_weights
     )
 
     //

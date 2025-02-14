@@ -24,7 +24,6 @@ include { TUNE_WF                } from '../subworkflows/local/tune'
 workflow DEEPMODELOPTIM {
 
     take:
-    // Updated input channels for stimulus-py
     ch_data_config
     ch_data
     ch_model
@@ -81,31 +80,24 @@ workflow DEEPMODELOPTIM {
     // Check model
     // ==============================================================================
 
-    // CHECK_MODEL_WF (
-    //      ch_yaml_sub_config.first(),
-    //      ch_transformed_data.first(),
-    //      ch_model,
-    //      ch_model_config,
-    //      ch_initial_weights
-    // )
+    CHECK_MODEL_WF (
+         ch_transformed_data.first(),
+         ch_yaml_sub_config.first(),
+         ch_model,
+         ch_model_config,
+         ch_initial_weights
+    )
 
     // ==============================================================================
     // Tune model
     // ==============================================================================
 
-    ch_transformed_data_with_sub_config = ch_transformed_data
-        .join(ch_yaml_sub_config)
-
-    ch_model_with_config = ch_model
-        .combine(ch_model_config)
-        .map { model, model_config ->
-            def meta = [id: model.simpleName]  // TODO: input channel metadata should be parsed at the beginning of the pipeline
-            [meta, model, model_config]
-        }
-
     TUNE_WF(
-        ch_transformed_data_with_sub_config,
-        ch_model_with_config
+        ch_transformed_data,
+        ch_yaml_sub_config,
+        ch_model,
+        ch_model_config,
+        ch_initial_weights
     )
 
     /*

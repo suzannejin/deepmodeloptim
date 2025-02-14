@@ -1,14 +1,18 @@
 
 process CHECK_MODEL {
 
-    tag "$data_config - $data"
+    tag "check model"
     label 'process_medium'
     // TODO: push image to nf-core quay.io
     container "docker.io/mathysgrapotte/stimulus-py:0.2.6"
     containerOptions '--shm-size=2gb'
 
     input:
-    tuple path(data), path(model),  path(data_config), path(model_config)//, path(initial_weights)
+    tuple val(meta), path(data_config)
+    tuple val(meta2), path(data)
+    tuple val(meta3), path(model)
+    tuple val(meta4), path(model_config)
+    tuple val(meta5), path(initial_weights)
 
     output:
     stdout emit: standardout
@@ -30,12 +34,12 @@ process CHECK_MODEL {
         -d ${data} \
         -m ${model} \
         -c ${model_config} \
+        --ray_results_dirpath "\${PWD}" \
         $args
-
     """
 
     stub:
     """
-    echo passing
+    echo passing check-model stub
     """
 }

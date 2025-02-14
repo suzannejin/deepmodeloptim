@@ -15,23 +15,23 @@ include { STIMULUS_SPLIT_DATA } from '../../../modules/local/stimulus_split_csv.
 workflow SPLIT_CSV_WF {
 
     take:
-        ch_data
-        ch_yaml_sub_config
+    ch_data
+    ch_yaml_sub_config
 
     main:
 
-        // ==============================================================================
-        // Split csv data using stimulus
-        // ==============================================================================
+    // ==============================================================================
+    // Split csv data using stimulus
+    // ==============================================================================
 
-        STIMULUS_SPLIT_DATA(
-            ch_yaml_sub_config,
-            ch_data
-        )
-        ch_split_data = STIMULUS_SPLIT_DATA.out.csv_with_split
+    STIMULUS_SPLIT_DATA(
+        ch_yaml_sub_config,
+        ch_data
+    )
+    ch_split_data = STIMULUS_SPLIT_DATA.out.csv_with_split
 
     emit:
-        split_data = ch_split_data
+    split_data = ch_split_data
 }
 
 

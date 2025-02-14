@@ -8,13 +8,13 @@ process STIMULUS_SPLIT_DATA {
 
     input:
     tuple val(meta), path(sub_config)
-    tuple path(data)  // TODO: create data channel with meta2, this is nf-core style
+    tuple val(meta2), path(data)
 
     output:
     tuple val(meta), path("${prefix}.csv"), emit: csv_with_split
 
     script:
-    prefix = "${data.simpleName}-split-${meta.id}"
+    prefix = "${meta2.id}-split-${meta.id}"
     """
     stimulus-split-csv \
         -c ${data} \
@@ -23,7 +23,7 @@ process STIMULUS_SPLIT_DATA {
     """
 
     stub:
-    prefix = "${data.simpleName}-split-${meta.id}"
+    prefix = "${meta2.id}-split-${meta.id}"
     """
     touch ${prefix}.csv
     """

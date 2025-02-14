@@ -5,7 +5,7 @@ process STIMULUS_TUNE {
 
     input:
     tuple val(meta), path(transformed_data), path(data_sub_config)
-    tuple val(meta2), path(model), path(model_config)
+    tuple val(meta2), path(model), path(model_config), path(initial_weights)
 
     output:
     tuple val(meta), path("${prefix}-best-model.safetensors"), emit: model
@@ -18,6 +18,7 @@ process STIMULUS_TUNE {
     // it needs to be updated in stimulus-py package
     script:
     prefix = meta.id
+    use_initial_weights = initial_weights != [] ? "-w ${initial_weights}" : ""
     """
     if ! ray status 2>/dev/null; then
         ray start --head --temp-dir /tmp/ray
@@ -33,6 +34,7 @@ process STIMULUS_TUNE {
         -bo ${prefix}-best-optimizer.opt \
         -bm ${prefix}-best-metrics.json \
         -bc ${prefix}-best-tune-config.json \
+        ${use_initial_weights} \
         --tune_run_name ${prefix}-tune-run \
         --ray_results_dirpath "\${PWD}"
     """
