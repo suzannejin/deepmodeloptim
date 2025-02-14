@@ -14,34 +14,23 @@ include { STIMULUS_TUNE } from '../../../modules/local/stimulus_tune.nf'
 
 workflow TUNE_WF {
     take:
-    ch_transformed_data
-    ch_sub_configs
-    ch_model
-    ch_model_config
+    ch_transformed_data_with_sub_config
+    ch_model_with_config
     
     main:
-    // Map channels to include a key based on index number only
-    ch_data_keyed = ch_transformed_data.map { file -> 
-        def key = (file.name =~ /(\d+)/)[0][1]  // Extract first number found
-        [key, file] 
-    }
-    ch_config_keyed = ch_sub_configs.map { file -> 
-        def key = (file.name =~ /(\d+)/)[0][1]  // Extract first number found
-        [key, file] 
-    }
 
-    // Join by key then add single elements
-    ch_input = ch_data_keyed.join(ch_config_keyed)
-        .map { _key, data, config -> [data, config] }  // Remove key
-        .combine(ch_model)
-        .combine(ch_model_config)
-
-    STIMULUS_TUNE(ch_input)
+    STIMULUS_TUNE(
+        ch_transformed_data_with_sub_config,
+        ch_model_with_config.collect()
+    )
 
     emit:
-    tune_specs = STIMULUS_TUNE.out.tune_specs
+    model = STIMULUS_TUNE.out.model
+    optimizer = STIMULUS_TUNE.out.optimizer
+    metrics = STIMULUS_TUNE.out.metrics
+    tune_config = STIMULUS_TUNE.out.tune_config
+    tune_experiments = STIMULUS_TUNE.out.tune_experiments
 }
-
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

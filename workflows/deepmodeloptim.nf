@@ -29,7 +29,7 @@ workflow DEEPMODELOPTIM {
     ch_data
     ch_model
     ch_model_config
-    //ch_initial_weights
+    ch_initial_weights
 
     main:
 
@@ -66,67 +66,47 @@ workflow DEEPMODELOPTIM {
     )
     ch_split_data_with_sub_config = SPLIT_CSV_WF.out.split_data
         .combine(ch_yaml_sub_config)
-        .multiMap { meta_data, data, meta_yaml, yaml ->
-            data:
-                [meta_yaml, data]
-            yaml:
-                [meta_yaml, yaml]
+        .map { meta_data, data, meta_yaml, yaml ->
+            [meta_yaml, data, yaml]
         }
 
     // ==============================================================================
     // transform csv file
     // ==============================================================================
 
-    TRANSFORM_CSV_WF(
-        ch_split_data_with_sub_config.data,
-        ch_split_data_with_sub_config.yaml
-    )
+    TRANSFORM_CSV_WF(ch_split_data_with_sub_config)
     ch_transformed_data = TRANSFORM_CSV_WF.out.transformed_data
-    
-    // ch_sub_configs = ch_transformed_data.map { _csv, yaml -> yaml }
-    // ch_transformed_data_splits = ch_transformed_data.map { csv, _yaml -> csv }
 
-    // ch_first_sub_config = ch_sub_configs.first()
-    // ch_first_transformed_data_split = ch_transformed_data_splits.first()
+    // ==============================================================================
+    // Check model
+    // ==============================================================================
 
-    
-    // /*
-    // // Update CHECK_MODEL invocation using channels
     // CHECK_MODEL_WF (
-    //      ch_first_sub_config,
-    //      ch_first_data_split,
+    //      ch_yaml_sub_config.first(),
+    //      ch_transformed_data.first(),
     //      ch_model,
-    //      ch_model_config
-    //      //ch_initial_weights
-    // )
-    // */
-
-    
-    // TUNE_WF(
-    //     ch_transformed_data_splits,
-    //     ch_sub_configs,
-    //     ch_model,
-    //     ch_model_config
+    //      ch_model_config,
+    //      ch_initial_weights
     // )
 
-    
-    // TUNE_WF.out.tune_specs.view()
+    // ==============================================================================
+    // Tune model
+    // ==============================================================================
 
-    // emit: 
-    // ch_split_data
-    /*
-    prepared_data = HANDLE_DATA.out.data
-    //HANDLE_DATA.out.data.view()
+    ch_transformed_data_with_sub_config = ch_transformed_data
+        .join(ch_yaml_sub_config)
 
-    // Update HANDLE_TUNE invocation using channels
-    HANDLE_TUNE(
-        ch_model,
-        ch_model_config,
-        prepared_data,
-        ch_initial_weights
+    ch_model_with_config = ch_model
+        .combine(ch_model_config)
+        .map { model, model_config ->
+            def meta = [id: model.simpleName]  // TODO: input channel metadata should be parsed at the beginning of the pipeline
+            [meta, model, model_config]
+        }
+
+    TUNE_WF(
+        ch_transformed_data_with_sub_config,
+        ch_model_with_config
     )
-    //HANDLE_TUNE.out.model.view()
-    //HANDLE_TUNE.out.tune_out.view()
 
     /*
     // Software versions collation remains as comments

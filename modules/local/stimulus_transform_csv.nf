@@ -7,8 +7,7 @@ process STIMULUS_TRANSFORM_CSV {
     container "docker.io/mathysgrapotte/stimulus-py:0.2.6"
 
     input:
-    tuple val(meta), path(config)
-    tuple val(meta2), path(data)
+    tuple val(meta), path(data), path(config)
 
     output:
     tuple val(meta), path("${prefix}.csv"), emit: transformed_data

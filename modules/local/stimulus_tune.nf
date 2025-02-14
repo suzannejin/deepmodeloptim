@@ -1,12 +1,23 @@
 process STIMULUS_TUNE {
-    tag "${sub_data_config.simpleName}"
+    tag "${meta.id}"
     label 'process_high'
     container "docker.io/mathysgrapotte/stimulus-py:0.2.6"
+
     input:
-    tuple path(transformed_data), path(sub_data_config), path(model), path(model_config)
+    tuple val(meta), path(transformed_data), path(data_sub_config)
+    tuple val(meta2), path(model), path(model_config)
+
     output:
-    tuple path("${sub_data_config.simpleName}-best-model.safetensors"), path("${sub_data_config.simpleName}-best-optimizer.opt"), path("${sub_data_config.simpleName}-best-metrics.json"), path("${sub_data_config.simpleName}-best-tune-config.json"), path("TuneModel_*"),emit: tune_specs
+    tuple val(meta), path("${prefix}-best-model.safetensors"), emit: model
+    tuple val(meta), path("${prefix}-best-optimizer.opt")    , emit: optimizer
+    tuple val(meta), path("${prefix}-best-metrics.json")     , emit: metrics
+    tuple val(meta), path("${prefix}-best-tune-config.json") , emit: tune_config
+    tuple val(meta), path("TuneModel_*")                     , emit: tune_experiments, optional: true
+
+    // TODO: this is a temporary fix with tuning.py
+    // it needs to be updated in stimulus-py package
     script:
+    prefix = meta.id
     """
     if ! ray status 2>/dev/null; then
         ray start --head --temp-dir /tmp/ray
@@ -14,15 +25,25 @@ process STIMULUS_TUNE {
     fi
 
     tuning.py \
-            -d ${transformed_data} \
-            -m ${model} \
-            -e ${sub_data_config} \
-            -c ${model_config} \
-            -o ${sub_data_config.simpleName}-best-model.safetensors \
-            -bo ${sub_data_config.simpleName}-best-optimizer.opt \
-            -bm ${sub_data_config.simpleName}-best-metrics.json \
-            -bc ${sub_data_config.simpleName}-best-tune-config.json \
-            --tune_run_name ${sub_data_config.simpleName}-tune-run \
-            --ray_results_dirpath "\${PWD}"
+        -d ${transformed_data} \
+        -m ${model} \
+        -e ${data_sub_config} \
+        -c ${model_config} \
+        -o ${prefix}-best-model.safetensors \
+        -bo ${prefix}-best-optimizer.opt \
+        -bm ${prefix}-best-metrics.json \
+        -bc ${prefix}-best-tune-config.json \
+        --tune_run_name ${prefix}-tune-run \
+        --ray_results_dirpath "\${PWD}"
+    """
+
+    stub:
+    prefix = meta.id
+    """
+    touch ${prefix}-best-model.safetensors
+    touch ${prefix}-best-optimizer.opt
+    touch ${prefix}-best-metrics.json
+    touch ${prefix}-best-tune-config.json
+    touch TuneModel_stub.txt
     """
 }
