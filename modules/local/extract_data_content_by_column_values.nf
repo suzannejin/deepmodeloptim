@@ -52,4 +52,15 @@ process EXTRACT_DATA_CONTENT_BY_COLUMN_VALUES {
         bash: \$(echo \$(bash --version | grep -Eo 'version [[:alnum:].]+' | sed 's/version //'))
     END_VERSIONS
     """
+
+    stub:
+    prefix = task.ext.prefix ?: "${meta.id}.extracted"
+    extension = data.getName().split("\\.").last()
+    """
+    touch ${prefix}.${extension}
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        bash: \$(echo \$(bash --version | grep -Eo 'version [[:alnum:].]+' | sed 's/version //'))
+    END_VERSIONS
+    """
 }

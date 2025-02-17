@@ -43,8 +43,9 @@ workflow DEEPMODELOPTIM {
     // TODO load preprocessing yaml config
     // this is only temporary for testing purposes
     ch_preprocessing_config = Channel.of(
-        [id:'ZNF367_aliens', variable:'tf_name', target:'ZNF367', background:[]],
-        [id:'LEUTX_aliens', variable:'tf_name', target:'LEUTX', background:[]]
+        [id:'ZNF367_aliens', variable:'tf_name', target:'ZNF367', background:'LEUTX,ZNF395', background_type:'aliens'],
+        [id:'LEUTX_aliens', variable:'tf_name', target:'LEUTX', background:'ZNF367,ZNF395', background_type:'aliens'],
+        [id:'ZNF395_aliens', variable:'tf_name', target:'ZNF395', background:'ZNF367,LEUTX', background_type:'aliens']
     )
 
     // run preprocessing
