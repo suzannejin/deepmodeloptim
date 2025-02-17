@@ -4,7 +4,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { STIMULUS_SPLIT_CSV } from '../../../modules/local/stimulus_split_csv.nf'
+include { STIMULUS_SPLIT_DATA } from '../../../modules/local/stimulus_split_csv.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -12,21 +12,26 @@ include { STIMULUS_SPLIT_CSV } from '../../../modules/local/stimulus_split_csv.n
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow SPLIT_CSV {
+workflow SPLIT_CSV_WF {
 
     take:
-    data_csv
-    json_tuple
+    ch_data
+    ch_yaml_sub_config
 
     main:
 
-    // if there is more than one csv then each of them will be associated to all Json. This means all the modifications will be made on all the input csv.
-    json_csv_pairs = json_tuple.combine(data_csv)
-    STIMULUS_SPLIT_CSV( json_csv_pairs )
+    // ==============================================================================
+    // Split csv data using stimulus
+    // ==============================================================================
+
+    STIMULUS_SPLIT_DATA(
+        ch_yaml_sub_config,
+        ch_data
+    )
+    ch_split_data = STIMULUS_SPLIT_DATA.out.csv_with_split
 
     emit:
-    split_data  = STIMULUS_SPLIT_CSV.out.csv_with_split
-
+    split_data = ch_split_data
 }
 
 

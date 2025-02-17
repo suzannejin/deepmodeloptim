@@ -1,26 +1,30 @@
 
-process STIMULUS_SPLIT_CSV {
+process STIMULUS_SPLIT_DATA {
 
-    tag "${original_csv} - ${split_transform_key}"
+    tag "${sub_config}"
     label 'process_low'
     // TODO: push image to nf-core quay.io
-    container "docker.io/mathysgrapotte/stimulus-py:latest"
+    container "docker.io/mathysgrapotte/stimulus-py:0.2.6"
 
     input:
-    tuple val(split_transform_key), path(split_json), path(original_csv)
+    tuple val(meta), path(sub_config)
+    tuple val(meta2), path(data)
 
     output:
-    tuple val(split_transform_key), path(output), path(split_json), path(original_csv), emit: csv_with_split
+    tuple val(meta), path("${prefix}.csv"), emit: csv_with_split
 
     script:
-    output = "${original_csv.simpleName}-split.csv"
+    prefix = task.ext.prefix ?: "${meta2.id}-split-${meta.id}"
     """
-    stimulus-split-csv -c ${original_csv} -j ${split_json} -o ${output}
+    stimulus-split-csv \
+        -c ${data} \
+        -y ${sub_config} \
+        -o ${prefix}.csv
     """
 
     stub:
-    output = "${original_csv.simpleName}-split.csv"
+    prefix = task.ext.prefix ?: "${meta2.id}-split-${meta.id}"
     """
-    touch ${output}
+    touch ${prefix}.csv
     """
 }

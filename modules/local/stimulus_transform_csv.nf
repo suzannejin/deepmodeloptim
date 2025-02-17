@@ -1,27 +1,29 @@
 
 process STIMULUS_TRANSFORM_CSV {
 
-    tag "${original_csv} - ${combination_key}"
+    tag "${data} - ${config}"
     label 'process_medium'
     // TODO: push image to nf-core quay.io
-    container "docker.io/mathysgrapotte/stimulus-py:latest"
+    container "docker.io/mathysgrapotte/stimulus-py:0.2.6"
 
     input:
-    tuple val(split_transform_key), val(combination_key), path(transform_json), path(splitted_csv), path(split_json), path(original_csv)
+    tuple val(meta), path(data), path(config)
 
     output:
-    // combination_key is put first so that later a combine by:0 can be used to unify with the json that has experiment information (split + transform) associated with this data
-    tuple  val(combination_key), val(split_transform_key), path(transform_json), path(output), path(split_json), path(original_csv), emit: transformed_data
+    tuple val(meta), path("${prefix}.csv"), emit: transformed_data
 
     script:
-    output = "${original_csv.simpleName}-${combination_key}-trans.csv"
+    prefix = task.ext.prefix ?: "${data.simpleName}-${meta.id}-trans"
     """
-    stimulus-transform-csv -c ${splitted_csv} -j ${transform_json} -o ${output}
+    stimulus-transform-csv \
+        -c ${data} \
+        -y ${config} \
+        -o ${prefix}.csv
     """
 
     stub:
-    output = "${original_csv.simpleName}-${combination_key}-trans.csv"
+    prefix = task.ext.prefix ?: "${data.simpleName}-${meta.id}-trans"
     """
-    touch ${output}
+    touch ${prefix}.csv
     """
 }

@@ -31,12 +31,11 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_deep
 workflow NFCORE_DEEPMODELOPTIM {
 
     take:
-    // samplesheet // channel: samplesheet read in from --input
-    csv
-    exp_conf
-    model
-    tune_conf
-    initial_weights
+        data_config
+        data
+        model
+        model_config
+        initial_weights
 
     main:
 
@@ -44,11 +43,10 @@ workflow NFCORE_DEEPMODELOPTIM {
     // WORKFLOW: Run pipeline
     //
     DEEPMODELOPTIM (
-        // samplesheet,
-        csv,
-        exp_conf,
+        data_config,
+        data,
         model,
-        tune_conf,
+        model_config,
         initial_weights
     )
 }
@@ -77,13 +75,23 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
+    ch_data_config     = Channel.fromPath(params.data_config, checkIfExists: true).map { it -> [[id:it.baseName], it]}
+    ch_data            = Channel.fromPath(params.data, checkIfExists: true).map { it -> [[id:it.baseName], it]}
+    ch_model           = Channel.fromPath(params.model, checkIfExists: true).map { it -> [[id:it.baseName], it]}
+    ch_model_config    = Channel.fromPath(params.model_config, checkIfExists: true).map { it -> [[id:it.baseName], it]}
+    if (params.initial_weights != null) {
+        ch_initial_weights = Channel.fromPath(params.initial_weights, checkIfExists: true)
+            .map { it -> [[id:it.baseName], it]}
+    } else {
+        ch_initial_weights = Channel.of([[],[]])
+    }
+
     NFCORE_DEEPMODELOPTIM (
-        // PIPELINE_INITIALISATION.out.samplesheet,
-        params.csv,
-        params.exp_conf,
-        params.model,
-        params.tune_conf,
-        params.initial_weights
+        ch_data_config,
+        ch_data,
+        ch_model,
+        ch_model_config,
+        ch_initial_weights
     )
 
     //
