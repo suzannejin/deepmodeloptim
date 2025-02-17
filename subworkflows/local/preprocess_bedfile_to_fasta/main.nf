@@ -3,18 +3,19 @@ include { EXTRACT_DATA_CONTENT_BY_COLUMN_VALUES as EXTRACT_FOREGROUND } from '..
 workflow PREPROCESS_BEDFILE_TO_FASTA {
     take:
     ch_input
+    ch_config
 
     main:
 
-    // TODO at the beginning of the pipeline, parse the preprocessing data that specify the foreground and background
-    // here this is only temporary for testing purpose
-    ch_foreground_ids = Channel.of([[id:'ZNF367'],'tf_name','ZNF367'])
-    ch_foreground_ids.view()
-
     // extract foreground
+
+    ch_foreground_ids = ch_config.map{ meta ->
+            [meta, meta.variable, meta.target]
+        }
+    
     EXTRACT_FOREGROUND(
         ch_foreground_ids,
-        ch_input
+        ch_input.collect()
     )
 
     // extract background

@@ -40,10 +40,18 @@ workflow DEEPMODELOPTIM {
     // preprocess data
     // ==============================================================================
 
-    // load preprocessing config
+    // TODO load preprocessing yaml config
+    // this is only temporary for testing purposes
+    ch_preprocessing_config = Channel.of(
+        [id:'ZNF367_aliens', variable:'tf_name', target:'ZNF367', background:[]],
+        [id:'LEUTX_aliens', variable:'tf_name', target:'LEUTX', background:[]]
+    )
 
     // run preprocessing
-    PREPROCESS_BEDFILE_TO_FASTA(ch_data)
+    PREPROCESS_BEDFILE_TO_FASTA(
+        ch_data,
+        ch_preprocessing_config
+    )
 
     // // ==============================================================================
     // // split meta yaml config file into individual yaml files
