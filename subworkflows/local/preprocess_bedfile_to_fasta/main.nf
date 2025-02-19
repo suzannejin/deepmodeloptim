@@ -20,7 +20,10 @@ the dataset for stimulus with sequences as input and foreground/background
 */
 include { EXTRACT_DATA_CONTENT_BY_COLUMN_VALUES as EXTRACT_FOREGROUND        } from '../../../modules/local/extract_data_content_by_column_values'
 include { EXTRACT_DATA_CONTENT_BY_COLUMN_VALUES as EXTRACT_BACKGROUND_ALIENS } from '../../../modules/local/extract_data_content_by_column_values'
+
+include { GAWK as CENTER_AROUND_PEAK                                         } from '../../../modules/nf-core/gawk'
 include { BEDTOOLS_SUBTRACT                                                  } from '../../../modules/nf-core/bedtools/subtract'
+
 
 workflow PREPROCESS_BEDFILE_TO_FASTA {
     take:
@@ -35,12 +38,23 @@ workflow PREPROCESS_BEDFILE_TO_FASTA {
     // align peaks
     // ==============================================================================
 
-    // center and cut peaks to a fixed size
-    // alessio module
+    // TODO the foolowing is just a proof of concept and how to example 
+    // on the usage of the GAWK nf-core module for modifying
+    // bed start and end values based on distance from peak (centering).
+    /*
+    ch_genome_size = channel.fromPath("/users/cn/avignoli/test/human.hg38.genome") // abs path so you can go and check if needed on cluster.
+    ch_input_bed = channel.fromPath("/users/cn/avignoli/test/input.bed")
+    ch_center_input = ch_genome_size.combine(ch_input_bed).map{
+        it -> [["id" : it[1].getBaseName(), "size" : 10], it]
+    } // TODO replace size with the appropriate params/variable containing the size to be used for centering
+    ch_awk_program = channel.fromPath('./bin/center_around_peak.sh')
+    CENTER_AROUND_PEAK(ch_center_input, ch_awk_program)
+    */
 
     // ==============================================================================
     // extract foreground
     // ==============================================================================
+
 
     // extract foreground
 
