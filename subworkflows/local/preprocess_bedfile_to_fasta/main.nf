@@ -27,6 +27,7 @@ workflow PREPROCESS_BEDFILE_TO_FASTA {
     ch_input
     ch_config
     ch_genome
+    ch_genome_sizes
 
     main:
 
