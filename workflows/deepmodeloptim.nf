@@ -30,6 +30,7 @@ workflow DEEPMODELOPTIM {
     ch_model
     ch_model_config
     ch_initial_weights
+    ch_genome_sizes
 
     main:
 
@@ -51,7 +52,8 @@ workflow DEEPMODELOPTIM {
     // run preprocessing
     PREPROCESS_BEDFILE_TO_FASTA(
         ch_data,
-        ch_preprocessing_config
+        ch_preprocessing_config,
+        ch_genome_sizes
     )
 
     // // ==============================================================================

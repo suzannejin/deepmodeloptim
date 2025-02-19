@@ -36,6 +36,7 @@ workflow NFCORE_DEEPMODELOPTIM {
         model
         model_config
         initial_weights
+        genome_sizes
 
     main:
 
@@ -47,7 +48,8 @@ workflow NFCORE_DEEPMODELOPTIM {
         data,
         model,
         model_config,
-        initial_weights
+        initial_weights,
+        genome_sizes
     )
 }
 
@@ -73,7 +75,8 @@ workflow {
     )
 
     //
-    // WORKFLOW: Run main workflow
+    // INPUT: Load input data
+    // todo: not sure if this should be here
     //
     ch_data_config     = Channel.fromPath(params.data_config, checkIfExists: true).map { it -> [[id:it.baseName], it]}
     ch_data            = Channel.fromPath(params.data, checkIfExists: true).map { it -> [[id:it.baseName], it]}
@@ -85,13 +88,18 @@ workflow {
     } else {
         ch_initial_weights = Channel.of([[],[]])
     }
+    ch_genome_sizes = Channel.fromPath(params.genome_sizes, checkIfExists: true).map { it -> [[id:it.baseName], it]}
 
+    //
+    // WORKFLOW: Run main workflow
+    //
     NFCORE_DEEPMODELOPTIM (
         ch_data_config,
         ch_data,
         ch_model,
         ch_model_config,
-        ch_initial_weights
+        ch_initial_weights,
+        ch_genome_sizes
     )
 
     //

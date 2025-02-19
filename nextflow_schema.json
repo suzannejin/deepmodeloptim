@@ -77,6 +77,27 @@
                     "help_text": "The initial weights of the model. These files can be used to start the training instead of random initialization. One can provide several files, each of them will be used for a different run.",
                     "description": "File to be used to initialize the model in tuning",
                     "format": "path"
+                },
+                "genome_sizes": {
+                    "type": "string",
+                    "fa_icon": "fas fa-folder-open",
+                    "help_text": "Bedtools genome sizes file. This file is need for bedtools.",
+                    "description": "Bedtools genome sizes file.",
+                    "format": "path"
+                }
+            }
+        },
+        "preprocessing_bedfile_options": {
+            "title": "Preprocessing bedfile options",
+            "type": "object",
+            "description": "Define the parameters needed for the bedfile preprocessing step.",
+            "default": "",
+            "properties": {
+                "bedtools_slop_extension": {
+                    "type": "integer",
+                    "default": 300,
+                    "help_text": "increase the bed entry by the same number bp in each direction",
+                    "description": "bps to extend the bed entry"
                 }
             }
         },
