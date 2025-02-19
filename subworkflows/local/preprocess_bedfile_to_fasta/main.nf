@@ -1,28 +1,35 @@
-/*
-TODO write the meta.yaml file for this workflow
-
-Basically, this subworkflow expects to get a bed file as input,
-and a configuration channel that contains the target and background.
-
-It first centers the peaks and cuts them to a fixed size.
-
-Then it extracts the foreground and the background from the bed file.
-Alternatively, it can build the background from random regions or from
-the foreground peaks nearby regions.
-
-The peaks in background overlapping the foreground will be removed.
-Finally, the peaks are converted to fasta format.
-
-In this way, by knowing the target and background peaks, we can build
-the dataset for stimulus with sequences as input and foreground/background
-(0|1) classification as label.
-*/
-
-include { EXTRACT_DATA_CONTENT_BY_COLUMN_VALUES as EXTRACT_FOREGROUND        } from '../../../modules/local/extract_data_content_by_column_values'
-include { EXTRACT_DATA_CONTENT_BY_COLUMN_VALUES as EXTRACT_BACKGROUND_ALIENS } from '../../../modules/local/extract_data_content_by_column_values'
+/**
+ * Preprocess BED File to FASTA Workflow
+ *
+ * This subworkflow is designed to process a BED file and convert it into FASTA format,
+ * preparing datasets for downstream sequence-based classification tasks.
+ *
+ * Workflow Steps:
+ *   1. Center peaks and trim them to a fixed size.
+ *   2. Extract foreground (target).
+ *   3. Extract background (aliens, shades, random).
+ *   4. Convert the processed peaks into FASTA format.
+ *
+ * Expected Inputs:
+ *   - A channel containing BED file with peak regions.
+ *   - A configuration channel providing the necessary details for extracting target 
+ *     (foreground) and background.
+ *
+ * Output:
+ *   - A FASTA formatted file containing sequences for both the target (foreground) and
+ *     the corresponding background regions.
+ *
+ * Note:
+ *   - A meta.yaml file describing the workflow configuration, metadata, and dependencies
+ *     should be created as part of the workflow documentation.
+ */
 
 include { GAWK as CENTER_AROUND_PEAK                                         } from '../../../modules/nf-core/gawk'
+include { EXTRACT_DATA_CONTENT_BY_COLUMN_VALUES as EXTRACT_FOREGROUND        } from '../../../modules/local/extract_data_content_by_column_values'
+include { EXTRACT_DATA_CONTENT_BY_COLUMN_VALUES as EXTRACT_BACKGROUND_ALIENS } from '../../../modules/local/extract_data_content_by_column_values'
 include { BEDTOOLS_SUBTRACT                                                  } from '../../../modules/nf-core/bedtools/subtract'
+include { BEDTOOLS_GETFASTA as BEDTOOLS_GETFASTA_FOREGROUND                  } from '../../../modules/nf-core/bedtools/getfasta'
+include { BEDTOOLS_GETFASTA as BEDTOOLS_GETFASTA_BACKGROUND                  } from '../../../modules/nf-core/bedtools/getfasta'
 
 
 workflow PREPROCESS_BEDFILE_TO_FASTA {
@@ -56,7 +63,6 @@ workflow PREPROCESS_BEDFILE_TO_FASTA {
     // ==============================================================================
     // extract foreground
     // ==============================================================================
-
 
     // extract foreground
 
@@ -111,5 +117,17 @@ workflow PREPROCESS_BEDFILE_TO_FASTA {
 
     // run bedtools to convert to fasta
 
-    // emit:
+    BEDTOOLS_GETFASTA_FOREGROUND(
+        ch_foreground,
+        ch_genome.map{it[1]}
+    )
+
+    BEDTOOLS_GETFASTA_BACKGROUND(
+        ch_background,
+        ch_genome.map{it[1]}
+    )
+
+    emit:
+    foreground = BEDTOOLS_GETFASTA_FOREGROUND.out.fasta
+    background = BEDTOOLS_GETFASTA_BACKGROUND.out.fasta
 }
