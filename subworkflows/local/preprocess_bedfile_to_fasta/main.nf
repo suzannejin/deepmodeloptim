@@ -47,24 +47,25 @@ workflow PREPROCESS_BEDFILE_TO_FASTA {
     // align peaks
     // ==============================================================================
 
-    // TODO the foolowing is just a proof of concept and how to example 
-    // on the usage of the GAWK nf-core module for modifying
-    // bed start and end values based on distance from peak (centering).
-    /*
-    ch_genome_size = channel.fromPath("/users/cn/avignoli/test/human.hg38.genome") // abs path so you can go and check if needed on cluster.
-    ch_input_bed = channel.fromPath("/users/cn/avignoli/test/input.bed")
-    ch_center_input = ch_genome_size.combine(ch_input_bed).map{
-        it -> [["id" : it[1].getBaseName(), "size" : 10], it]
-    } // TODO replace size with the appropriate params/variable containing the size to be used for centering
-    ch_awk_program = channel.fromPath('./bin/center_around_peak.sh')
-    CENTER_AROUND_PEAK(ch_center_input, ch_awk_program)
-    */
+    // use the GAWK nf-core module for modifying bed start and end values 
+    // based on distance from peak (centering).
+
+    ch_input_for_centering = ch_input
+        .combine(ch_genome_sizes.map{it[1]})
+        .map { meta, input, genome_sizes ->
+            [meta, [genome_sizes, input]]
+        }
+    ch_awk_program = Channel.fromPath('./bin/center_around_peak.sh')
+
+    CENTER_AROUND_PEAK(
+        ch_input_for_centering, 
+        ch_awk_program
+    )
+    ch_input = CENTER_AROUND_PEAK.out.output
 
     // ==============================================================================
     // extract foreground
     // ==============================================================================
-
-    // extract foreground
 
     ch_foreground_ids = ch_config
         .map{ it ->
