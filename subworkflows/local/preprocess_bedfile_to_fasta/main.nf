@@ -16,8 +16,8 @@ Finally, the peaks are converted to fasta format.
 In this way, by knowing the target and background peaks, we can build
 the dataset for stimulus with sequences as input and foreground/background
 (0|1) classification as label.
-
 */
+
 include { EXTRACT_DATA_CONTENT_BY_COLUMN_VALUES as EXTRACT_FOREGROUND        } from '../../../modules/local/extract_data_content_by_column_values'
 include { EXTRACT_DATA_CONTENT_BY_COLUMN_VALUES as EXTRACT_BACKGROUND_ALIENS } from '../../../modules/local/extract_data_content_by_column_values'
 include { BEDTOOLS_SUBTRACT                                                  } from '../../../modules/nf-core/bedtools/subtract'
@@ -26,6 +26,7 @@ workflow PREPROCESS_BEDFILE_TO_FASTA {
     take:
     ch_input
     ch_config
+    ch_genome
 
     main:
 

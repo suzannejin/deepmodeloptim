@@ -25,11 +25,12 @@ include { TUNE_WF                     } from '../subworkflows/local/tune'
 workflow DEEPMODELOPTIM {
 
     take:
-    ch_data_config
     ch_data
+    ch_data_config
     ch_model
     ch_model_config
     ch_initial_weights
+    ch_genome
 
     main:
 
@@ -51,7 +52,8 @@ workflow DEEPMODELOPTIM {
     // run preprocessing
     PREPROCESS_BEDFILE_TO_FASTA(
         ch_data,
-        ch_preprocessing_config
+        ch_preprocessing_config,
+        ch_genome
     )
 
     // // ==============================================================================

@@ -31,7 +31,11 @@ workflow PIPELINE_INITIALISATION {
     monochrome_logs   // boolean: Do not use coloured log outputs
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
-    //input             //  string: Path to input samplesheet
+    data
+    data_config
+    model
+    model_config
+    initial_weights
 
     main:
 
@@ -64,33 +68,37 @@ workflow PIPELINE_INITIALISATION {
     )
 
     //
-    // Create channel from input file provided through params.input
+    // Create channels from mandatory input files
     //
+    ch_data            = Channel.fromPath(data, checkIfExists: true).map { it -> [[id:it.baseName], it]}
+    ch_data_config     = Channel.fromPath(data_config, checkIfExists: true).map { it -> [[id:it.baseName], it]}
+    ch_model           = Channel.fromPath(model, checkIfExists: true).map { it -> [[id:it.baseName], it]}
+    ch_model_config    = Channel.fromPath(model_config, checkIfExists: true).map { it -> [[id:it.baseName], it]}
 
-    // TODO: Adequate it to our input if `input` is implemented
-    // Channel
-    //     .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
-    //     .map {
-    //         meta, fastq_1, fastq_2 ->
-    //             if (!fastq_2) {
-    //                 return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-    //             } else {
-    //                 return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-    //             }
-    //     }
-    //     .groupTuple()
-    //     .map { samplesheet ->
-    //         validateInputSamplesheet(samplesheet)
-    //     }
-    //     .map {
-    //         meta, fastqs ->
-    //             return [ meta, fastqs.flatten() ]
-    //     }
-    //     .set { ch_samplesheet }
+    //
+    // Create channels from optional input files
+    //
+    ch_initial_weights = initial_weights == null ?
+        Channel.of([[],[]]) :
+        Channel.fromPath(initial_weights, checkIfExists: true)
+            .map { it -> [[id:it.baseName], it]}
+
+    //
+    // Create channels needed for preprocessing protocols
+    //
+    ch_genome = params.genome == null ?
+        Channel.of([[],[]]) :
+        Channel.fromPath(params.genomes[params.genome]['fasta'], checkIfExists: true)
+            .map { it -> [[id:params.genome], it]}
 
     emit:
-    // samplesheet = ch_samplesheet
-    versions    = ch_versions
+    data            = ch_data
+    data_config     = ch_data_config
+    model           = ch_model
+    model_config    = ch_model_config
+    initial_weights = ch_initial_weights
+    genome          = ch_genome
+    versions        = ch_versions
 }
 
 /*
@@ -225,4 +233,3 @@ def methodsDescriptionText(mqc_methods_yaml) {
 
     return description_html.toString()
 }
-
